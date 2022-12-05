@@ -63,6 +63,7 @@
         "mutex": "cpp",
         "thread": "cpp",
         "typeindex": "cpp",
-        "variant": "cpp"
+        "variant": "cpp",
+        "armadillo": "cpp"
     }
 }
