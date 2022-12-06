@@ -71,6 +71,25 @@ Molecule::Molecule(std::string filename)
             }
         }
 
+        // Parsing the dihedral/torsional angle information in the molecule;
+        while (std::getline(infile, line))
+        {
+            if (line.find("*") != std::string::npos)
+            {
+                break;
+            }
+
+            if (line.size() != 0){
+                std::stringstream lineStream(line); 
+                
+                arma::irowvec d_angles;
+                d_angles.zeros(4);
+
+                lineStream >> d_angles(0) >> d_angles(1) >> d_angles(2) >> d_angles(3);
+                _d_angle_data = std::move(arma::join_cols(_d_angle_data, d_angles));
+            }
+        }
+
         // Assigning atom types (trivial implementation assuming only alkanes)
         _atom_types.zeros(_num_atoms);
         for (int i = 0; i < _num_atoms; i++)
@@ -82,6 +101,7 @@ Molecule::Molecule(std::string filename)
         _atom_identity.print("Vector of mol identity");
         _bonding_data.print("Matrix of bonding information");
         _angle_data.print("Matrix of angle information");
+        _d_angle_data.print("Matrix of torsional angle information");
         _atom_types.print("Atom Types");
     }
 };

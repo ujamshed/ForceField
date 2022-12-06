@@ -17,6 +17,8 @@ class Molecule
         arma::imat _bonding_data;
         // contains angles information for the molecule (i, j, k)
         arma::imat _angle_data;
+        // contains dihedral angles information for the molecule (i, j, k, l)
+        arma::imat _d_angle_data;
 
         // Maps element symbol to atomic number
         std::map<char, int> symbol_to_int = {{'H', 1}, {'C', 6}};
