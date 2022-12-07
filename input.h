@@ -27,4 +27,6 @@ class Molecule
         std::map<int, int> an_to_at = {{1, 5}, {6, 1}};
 
         Molecule(std::string filename);
+
+        arma::mat getMoleculeCoordinates();
 };

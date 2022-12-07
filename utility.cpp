@@ -51,3 +51,4 @@ double calc_partial_atomic_charge(arma::mat atom_types)
     double q0 = 0.0;
     return q0;
 };
+

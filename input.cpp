@@ -105,3 +105,8 @@ Molecule::Molecule(std::string filename)
         _atom_types.print("Atom Types");
     }
 };
+
+arma::mat Molecule::getMoleculeCoordinates()
+{
+    return _mol_data;
+}

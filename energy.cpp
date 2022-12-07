@@ -104,7 +104,7 @@ class calcEnergy
             return 332.0716*qi*qj / (dielectric_constant * (delta_R + delta));
         }
 
-        double bondingContributions()
+        double bondingContributions(arma::mat molecule_coordinates)
         {
             // Loop through all the bonding data and evaluate the bonding energy summation
             double total = 0;
@@ -116,8 +116,8 @@ class calcEnergy
                 int atom_j_index = _Mol->_bonding_data(i, 1);
 
                 // Get coordinates for the atoms involved in the bonding
-                arma::rowvec atom_i_coordinates = _Mol->_mol_data.row(atom_i_index);
-                arma::rowvec atom_j_coordinates = _Mol->_mol_data.row(atom_j_index);
+                arma::rowvec atom_i_coordinates = molecule_coordinates.row(atom_i_index);
+                arma::rowvec atom_j_coordinates = molecule_coordinates.row(atom_j_index);
 
                 // Get atom types for the atoms involved in the bonding
                 int atom_i_type = _Mol->_atom_types(atom_i_index);
@@ -141,7 +141,7 @@ class calcEnergy
             return total;
         }
 
-        double angleContributions()
+        double angleContributions(arma::mat molecule_coordinates)
         {
             // Loop through all the angle data and evaluate the bonding energy summation
             double total = 0;
@@ -154,9 +154,9 @@ class calcEnergy
                 int atom_k_index = _Mol->_angle_data(i, 2);
 
                 // Get coordinates for the atoms involved in the bonding
-                arma::rowvec atom_i_coordinates = _Mol->_mol_data.row(atom_i_index);
-                arma::rowvec atom_j_coordinates = _Mol->_mol_data.row(atom_j_index);
-                arma::rowvec atom_k_coordinates = _Mol->_mol_data.row(atom_k_index);
+                arma::rowvec atom_i_coordinates = molecule_coordinates.row(atom_i_index);
+                arma::rowvec atom_j_coordinates = molecule_coordinates.row(atom_j_index);
+                arma::rowvec atom_k_coordinates = molecule_coordinates.row(atom_k_index);
 
                 // Get atom types for the atoms involved in the bonding
                 int atom_i_type = _Mol->_atom_types(atom_i_index);
@@ -182,7 +182,7 @@ class calcEnergy
             return total;
         }
 
-        double angleStretchBendingContributions()
+        double angleStretchBendingContributions(arma::mat molecule_coordinates)
         {
             // Loop through all the angle data and evaluate the bonding energy summation
             double total = 0;
@@ -195,9 +195,9 @@ class calcEnergy
                 int atom_k_index = _Mol->_angle_data(i, 2);
 
                 // Get coordinates for the atoms involved in the bonding
-                arma::rowvec atom_i_coordinates = _Mol->_mol_data.row(atom_i_index);
-                arma::rowvec atom_j_coordinates = _Mol->_mol_data.row(atom_j_index);
-                arma::rowvec atom_k_coordinates = _Mol->_mol_data.row(atom_k_index);
+                arma::rowvec atom_i_coordinates = molecule_coordinates.row(atom_i_index);
+                arma::rowvec atom_j_coordinates = molecule_coordinates.row(atom_j_index);
+                arma::rowvec atom_k_coordinates = molecule_coordinates.row(atom_k_index);
 
                 // Get atom types for the atoms involved in the bonding
                 int atom_i_type = _Mol->_atom_types(atom_i_index);
@@ -247,7 +247,7 @@ class calcEnergy
 
         };
 
-        double torsionalContributions()
+        double torsionalContributions(arma::mat molecule_coordinates)
         {
             // Loop through all the angle data and evaluate the bonding energy summation
             double total = 0;
@@ -261,10 +261,10 @@ class calcEnergy
                 int atom_l_index = _Mol->_d_angle_data(i, 3);
 
                 // Get coordinates for the atoms involved in the bonding
-                arma::rowvec atom_i_coordinates = _Mol->_mol_data.row(atom_i_index);
-                arma::rowvec atom_j_coordinates = _Mol->_mol_data.row(atom_j_index);
-                arma::rowvec atom_k_coordinates = _Mol->_mol_data.row(atom_k_index);
-                arma::rowvec atom_l_coordinates = _Mol->_mol_data.row(atom_l_index);
+                arma::rowvec atom_i_coordinates = molecule_coordinates.row(atom_i_index);
+                arma::rowvec atom_j_coordinates = molecule_coordinates.row(atom_j_index);
+                arma::rowvec atom_k_coordinates = molecule_coordinates.row(atom_k_index);
+                arma::rowvec atom_l_coordinates = molecule_coordinates.row(atom_l_index);
 
                 // Get atom types for the atoms involved in the bonding
                 int atom_i_type = _Mol->_atom_types(atom_i_index);
@@ -274,6 +274,19 @@ class calcEnergy
 
                 // Get angle between the 4 atoms
                 double angle = calc_dihedral(atom_i_coordinates, atom_j_coordinates, atom_k_coordinates, atom_l_coordinates);
+
+                if (std::isnan(angle))
+                {
+                    std::cout << std::endl;
+                    std::cout << "Torsional angle is: " << angle << std::endl;
+                    std::cout << "Angle between: " << atom_i_index << ", " << atom_j_index << ", " << atom_k_index << ", " << atom_l_index << std::endl;
+                    atom_i_coordinates.print("Atom i coords");
+                    atom_j_coordinates.print("Atom j coords");
+                    atom_k_coordinates.print("Atom k coords");
+                    atom_l_coordinates.print("Atom l coords");
+
+                    std::cout << std::endl;
+                }
 
                 // Get torsional angle params
                 std::tuple<int, int, int, int> ijkl_atom_types = {atom_i_type, atom_j_type, atom_k_type, atom_l_type};
@@ -288,7 +301,7 @@ class calcEnergy
             return total;
         }
 
-        double vdwContributions()
+        double vdwContributions(arma::mat molecule_coordinates)
         {
             // Loop through all the dihedral angles (because they are at a minimum 3 bonds away) and get the interactions between the furthest 2
             // atoms (Will only work for ethane).
@@ -301,7 +314,7 @@ class calcEnergy
                 int atom_i_index = _Mol->_d_angle_data(i, 0);
 
                 // Get coordinates for atom i involved in the interaction
-                arma::rowvec atom_i_coordinates = _Mol->_mol_data.row(atom_i_index);
+                arma::rowvec atom_i_coordinates = molecule_coordinates.row(atom_i_index);
 
                 // Get atom type for atom i involved in the interaction
                 int atom_i_type = _Mol->_atom_types(atom_i_index);
@@ -310,7 +323,7 @@ class calcEnergy
                 int atom_j_index = _Mol->_d_angle_data(i, 3);
 
                 // Get coordinates for atom j involved in the interaction
-                arma::rowvec atom_j_coordinates = _Mol->_mol_data.row(atom_j_index);
+                arma::rowvec atom_j_coordinates = molecule_coordinates.row(atom_j_index);
 
                 // Get atom type for atom j involved in the interaction
                 int atom_j_type = _Mol->_atom_types(atom_j_index);
@@ -345,7 +358,7 @@ class calcEnergy
         };
 
         // Ethane does not have electrostatic contributions, so this is not implemented for now.
-        void electrostaticContributions()
+        void electrostaticContributions(arma::mat molecule_coordinates)
         {
             // Loop through all the atoms and evaluate the electrostatic interaction to each other atom only once
             double total = 0;
@@ -356,7 +369,7 @@ class calcEnergy
                 int atom_i_index = i;
 
                 // Get coordinates for atom i involved in the interaction
-                arma::rowvec atom_i_coordinates = _Mol->_mol_data.row(atom_i_index);
+                arma::rowvec atom_i_coordinates = molecule_coordinates.row(atom_i_index);
 
                 // Get atom type for atom i involved in the interaction
                 int atom_i_type = _Mol->_atom_types(atom_i_index);
@@ -367,7 +380,7 @@ class calcEnergy
                     int atom_j_index = j;
 
                     // Get coordinates for atom j involved in the interaction
-                    arma::rowvec atom_j_coordinates = _Mol->_mol_data.row(atom_j_index);
+                    arma::rowvec atom_j_coordinates = molecule_coordinates.row(atom_j_index);
 
                     // Get atom type for atom j involved in the interaction
                     int atom_j_type = _Mol->_atom_types(atom_j_index);
@@ -390,10 +403,44 @@ class calcEnergy
             std::cout << "Vdw Total: " << total << std::endl;
         };
 
-        void total()
+        double total(arma::mat molecule_coordinates)
         {
-            double total = bondingContributions() + angleContributions() + angleStretchBendingContributions() + torsionalContributions() + vdwContributions();
-            std::cout << total << std::endl;
+            double total = bondingContributions(molecule_coordinates) + angleContributions(molecule_coordinates) + angleStretchBendingContributions(molecule_coordinates) + torsionalContributions(molecule_coordinates) + vdwContributions(molecule_coordinates);
+            std::cout << "Total is: " << total << std::endl;
+            return total;
+        }
+
+        // Function to calculate central difference using input matrix
+        arma::mat finite_central_differences_sd(arma::mat Coordinates, double step_size)
+        {
+            arma::mat zero;
+            zero.zeros(_Mol->_num_atoms,3);
+
+            // Loop through all atoms.
+            for (int i=0; i < _Mol->_num_atoms; i++)
+            {
+                // Loop through x y and z coordinates to get the gradient at each one keeping the rest constant.
+                for (int k=0; k < 3; k++)
+                {
+                    // Get current atom coordinates (x, y, z).
+                    arma::mat new_coordinates_plus = Coordinates;
+                    arma::mat new_coordinates_minus = Coordinates;
+
+                    // Step size adjustments for x, y or z.
+                    new_coordinates_plus(i, k) += step_size;
+                    new_coordinates_minus(i, k) -= step_size;
+
+                    // Calculate the plus and minus energies based on the movement of the atoms
+                    double plus_E = total(new_coordinates_plus);
+                    double minus_E = total(new_coordinates_minus);
+
+
+                    double force = -(plus_E - minus_E) / (2*step_size);
+                    zero(i, k) = force;
+                }
+            }
+            zero.print("Current Gradient");
+            return zero;
         }
 };
 
@@ -401,6 +448,8 @@ int main()
 {
     std::cout << "First Molecule: " << std::endl;
     Molecule Ethane("data/ethane.txt");
+    arma::mat Ethane_Coordinates = Ethane.getMoleculeCoordinates();
     calcEnergy Ethane_energy(&Ethane);
-    Ethane_energy.total();
+    Ethane_energy.total(Ethane_Coordinates);
+    Ethane_energy.finite_central_differences_sd(Ethane_Coordinates, 0.0001);
 }
