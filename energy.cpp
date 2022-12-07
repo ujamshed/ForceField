@@ -104,7 +104,7 @@ class calcEnergy
             return 332.0716*qi*qj / (dielectric_constant * (delta_R + delta));
         }
 
-        void bondingContributions()
+        double bondingContributions()
         {
             // Loop through all the bonding data and evaluate the bonding energy summation
             double total = 0;
@@ -138,9 +138,10 @@ class calcEnergy
                 total += bondStretching(params.first, delta_R);
             }
             std::cout << "Bonding Total: " << total << std::endl;
+            return total;
         }
 
-        void angleContributions()
+        double angleContributions()
         {
             // Loop through all the angle data and evaluate the bonding energy summation
             double total = 0;
@@ -178,9 +179,10 @@ class calcEnergy
                 total += angleBending(params.first, delta_Angle);
             }
             std::cout << "Angle Bending Total: " << total << std::endl;
+            return total;
         }
 
-        void angleStretchBendingContributions()
+        double angleStretchBendingContributions()
         {
             // Loop through all the angle data and evaluate the bonding energy summation
             double total = 0;
@@ -236,6 +238,7 @@ class calcEnergy
             }
 
             std::cout << "Angle Stretch Bending Total: " << total << std::endl;
+            return total;
         }
         
         // Ethane does not have oop contributions, so this is not implemented for now.
@@ -244,7 +247,7 @@ class calcEnergy
 
         };
 
-        void torsionalContributions()
+        double torsionalContributions()
         {
             // Loop through all the angle data and evaluate the bonding energy summation
             double total = 0;
@@ -282,17 +285,20 @@ class calcEnergy
             }
 
             std::cout << "Torsion Total: " << total << std::endl;
+            return total;
         }
 
-        void vdwContributions()
+        double vdwContributions()
         {
-            // Loop through all the atoms and evaluate the vdw interaction to each other atom only once
+            // Loop through all the dihedral angles (because they are at a minimum 3 bonds away) and get the interactions between the furthest 2
+            // atoms (Will only work for ethane).
             double total = 0;
 
-            for (int i=0; i < _Mol->_num_atoms; i++)
+            for (int i=0; i < _Mol->_d_angle_data.n_rows; i++)
             {
-                // Get indices for atom i involved in the interaction
-                int atom_i_index = i;
+
+                // Get index for atom i involved in the interaction (the first atom in the bonding)
+                int atom_i_index = _Mol->_d_angle_data(i, 0);
 
                 // Get coordinates for atom i involved in the interaction
                 arma::rowvec atom_i_coordinates = _Mol->_mol_data.row(atom_i_index);
@@ -300,44 +306,42 @@ class calcEnergy
                 // Get atom type for atom i involved in the interaction
                 int atom_i_type = _Mol->_atom_types(atom_i_index);
 
-                for (int j=i+1; j < _Mol->_num_atoms; j++)
-                {
-                    // Get indices for atom j involved in the interaction
-                    int atom_j_index = j;
+                // Get indices for atom j involved in the interaction
+                int atom_j_index = _Mol->_d_angle_data(i, 3);
 
-                    // Get coordinates for atom j involved in the interaction
-                    arma::rowvec atom_j_coordinates = _Mol->_mol_data.row(atom_j_index);
+                // Get coordinates for atom j involved in the interaction
+                arma::rowvec atom_j_coordinates = _Mol->_mol_data.row(atom_j_index);
 
-                    // Get atom type for atom j involved in the interaction
-                    int atom_j_type = _Mol->_atom_types(atom_j_index);
+                // Get atom type for atom j involved in the interaction
+                int atom_j_type = _Mol->_atom_types(atom_j_index);
 
-                    // Get distance between the 2 atoms
-                    double dist_Rij = euclidian_distance(atom_i_coordinates, atom_j_coordinates);
+                // Get distance between the 2 atoms
+                double dist_Rij = euclidian_distance(atom_i_coordinates, atom_j_coordinates);
 
-                    // Debugging
-                    // atom_i_coordinates.print("Atom i");
-                    // std::cout << "Atom i index: " << atom_i_index << " atom i type: " << atom_i_type << std::endl;
-                    // atom_j_coordinates.print("Atom j");
-                    // std::cout << "Atom j index: " << atom_j_index << " atom j type: " << atom_j_type << std::endl;
-                    // std::cout << std::endl;
+                // Debugging
+                // atom_i_coordinates.print("Atom i");
+                // std::cout << "Atom i index: " << atom_i_index << " atom i type: " << atom_i_type << std::endl;
+                // atom_j_coordinates.print("Atom j");
+                // std::cout << "Atom j index: " << atom_j_index << " atom j type: " << atom_j_type << std::endl;
+                // std::cout << std::endl;
 
-                    // Get params
-                    std::tuple<double, double, double, double> i_params = vdw_params[atom_i_type];
-                    std::tuple<double, double, double, double> j_params = vdw_params[atom_j_type];
+                // Get params
+                std::tuple<double, double, double, double> i_params = vdw_params[atom_i_type];
+                std::tuple<double, double, double, double> j_params = vdw_params[atom_j_type];
 
-                    double alpha_i = std::get<0>(i_params);
-                    double alpha_j = std::get<0>(j_params);
-                    double N_i = std::get<1>(i_params);
-                    double N_j = std::get<1>(j_params);
-                    double Ai = std::get<2>(i_params);
-                    double Aj = std::get<2>(j_params);
-                    double Gi = std::get<3>(i_params);
-                    double Gj = std::get<3>(j_params);
+                double alpha_i = std::get<0>(i_params);
+                double alpha_j = std::get<0>(j_params);
+                double N_i = std::get<1>(i_params);
+                double N_j = std::get<1>(j_params);
+                double Ai = std::get<2>(i_params);
+                double Aj = std::get<2>(j_params);
+                double Gi = std::get<3>(i_params);
+                double Gj = std::get<3>(j_params);
 
-                    total += vdw(dist_Rij, Ai, Aj, alpha_i, alpha_j, N_i, N_j, Gi, Gj);
-                }               
+                total += vdw(dist_Rij, Ai, Aj, alpha_i, alpha_j, N_i, N_j, Gi, Gj);             
             }
             std::cout << "Vdw Total: " << total << std::endl;
+            return total;
         };
 
         // Ethane does not have electrostatic contributions, so this is not implemented for now.
@@ -385,6 +389,12 @@ class calcEnergy
             }
             std::cout << "Vdw Total: " << total << std::endl;
         };
+
+        void total()
+        {
+            double total = bondingContributions() + angleContributions() + angleStretchBendingContributions() + torsionalContributions() + vdwContributions();
+            std::cout << total << std::endl;
+        }
 };
 
 int main()
@@ -392,9 +402,5 @@ int main()
     std::cout << "First Molecule: " << std::endl;
     Molecule Ethane("data/ethane.txt");
     calcEnergy Ethane_energy(&Ethane);
-    Ethane_energy.bondingContributions();
-    Ethane_energy.angleContributions();
-    Ethane_energy.angleStretchBendingContributions();
-    Ethane_energy.torsionalContributions();
-    Ethane_energy.vdwContributions();
+    Ethane_energy.total();
 }
