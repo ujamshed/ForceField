@@ -275,19 +275,6 @@ class calcEnergy
                 // Get angle between the 4 atoms
                 double angle = calc_dihedral(atom_i_coordinates, atom_j_coordinates, atom_k_coordinates, atom_l_coordinates);
 
-                if (std::isnan(angle))
-                {
-                    std::cout << std::endl;
-                    std::cout << "Torsional angle is: " << angle << std::endl;
-                    std::cout << "Angle between: " << atom_i_index << ", " << atom_j_index << ", " << atom_k_index << ", " << atom_l_index << std::endl;
-                    atom_i_coordinates.print("Atom i coords");
-                    atom_j_coordinates.print("Atom j coords");
-                    atom_k_coordinates.print("Atom k coords");
-                    atom_l_coordinates.print("Atom l coords");
-
-                    std::cout << std::endl;
-                }
-
                 // Get torsional angle params
                 std::tuple<int, int, int, int> ijkl_atom_types = {atom_i_type, atom_j_type, atom_k_type, atom_l_type};
                 std::tuple<double, double, double> tp = t_params[ijkl_atom_types];
@@ -433,7 +420,6 @@ class calcEnergy
                     // Calculate the plus and minus energies based on the movement of the atoms
                     double plus_E = total(new_coordinates_plus);
                     double minus_E = total(new_coordinates_minus);
-
 
                     double force = -(plus_E - minus_E) / (2*step_size);
                     zero(i, k) = force;

@@ -40,7 +40,24 @@ double calc_dihedral(arma::rowvec atom_i, arma::rowvec atom_j, arma::rowvec atom
     double dist_n1 = euclidian_distance(n1, origin);
     double dist_n2 = euclidian_distance(n2, origin);
 
-    double angle = acos(arma::dot(n1, n2) / (dist_n1 * dist_n2));
+    // n1.print("Normal vector 1");
+    // n2.print("Normal vector 2");
+    // std::cout << "Distance n1: " << dist_n1 << std::endl;
+    // std::cout << "Distance n2: " << dist_n2 << std::endl;
+
+    double value = arma::dot(n1, n2) / (dist_n1 * dist_n2);
+
+    // Check to see if the value is less than -1 or greater than 1 (limits for acos function)
+    if (value < -1.00)
+    {
+        value = -1.00;
+    }
+    if (value > 1.00)
+    {
+        value = 1.00;
+    }
+
+    double angle = acos(value);
 
     return angle * (180/M_PI);
 };
