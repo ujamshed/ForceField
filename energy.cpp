@@ -9,7 +9,8 @@ class calcEnergy
         // Maps atom types to bond stretching parameters
         // First pair is the atom types involved in the bond, and the second pair are the params
         // First element of the second pair is the kb, while the second element of the second pair is the r0
-        std::map<std::pair<int, int>, std::pair<double, double>> bs_params = { {{1,1} , {4.258, 1.508}}, {{1,5} , {4.766, 1.093}} };
+        // Need 1,5 and 5,1 because C-H and H-C when considering the stretch bending contributions.
+        std::map<std::pair<int, int>, std::pair<double, double>> bs_params = { {{1,1} , {4.258, 1.508}}, {{1,5} , {4.766, 1.093}}, {{5,1} , {4.766, 1.093}} };
         
         // Maps atom types to angle parameters
         // First tuple is the atom types involved in the angle, and the second pair are the params
@@ -126,7 +127,7 @@ class calcEnergy
                 // Get distance between the 2 atoms
                 double dist = euclidian_distance(atom_i_coordinates, atom_j_coordinates);
 
-                // std::cout << "Atom i index: " << atom_i_index << " atom i type: " << atom_i_type << std::endl;
+                // std::cout << "Atom i index: " << atom_i_index << " atom i type: " << atom_i_type << " Distance: " << dist << std::endl;
                 // std::cout << "Atom j index: " << atom_j_index << " atom j type: " << atom_j_type << std::endl;
             
                 // Get params
@@ -187,12 +188,12 @@ class calcEnergy
             // Loop through all the angle data and evaluate the bonding energy summation
             double total = 0;
 
-            for (int i=0; i < _Mol->_angle_data.n_rows; i++)
+            for (int i=0; i < _Mol->_stretch_bend_data.n_rows; i++)
             {
                 // Get indices for the atoms involved in the angle
-                int atom_i_index = _Mol->_angle_data(i, 0);
-                int atom_j_index = _Mol->_angle_data(i, 1);
-                int atom_k_index = _Mol->_angle_data(i, 2);
+                int atom_i_index = _Mol->_stretch_bend_data(i, 0);
+                int atom_j_index = _Mol->_stretch_bend_data(i, 1);
+                int atom_k_index = _Mol->_stretch_bend_data(i, 2);
 
                 // Get coordinates for the atoms involved in the bonding
                 arma::rowvec atom_i_coordinates = molecule_coordinates.row(atom_i_index);
@@ -234,6 +235,9 @@ class calcEnergy
                 double delta_Rij = R_ij - bs_ij_params.second;
                 double delta_Rjk = R_jk - bs_jk_params.second;
 
+                std::cout << "Valence Angle: " << angle << " Delta Angle: " << delta_Angle << " Delta Rij: " << delta_Rij << " Delta Rjk: " << delta_Rjk << std::endl;
+                // std::cout << "F constant ij: " << asb.first << " F constant jk: " << asb.second << std::endl;
+                // std::cout << std::endl;
                 total += angleStretchBending(asb.first, asb.second, delta_Rij, delta_Rjk, delta_Angle);
             }
 
@@ -433,9 +437,9 @@ class calcEnergy
 int main()
 {
     std::cout << "First Molecule: " << std::endl;
-    Molecule Ethane("data/ethane.txt");
+    Molecule Ethane("data/methane.txt");
     arma::mat Ethane_Coordinates = Ethane.getMoleculeCoordinates();
     calcEnergy Ethane_energy(&Ethane);
     Ethane_energy.total(Ethane_Coordinates);
-    Ethane_energy.finite_central_differences_sd(Ethane_Coordinates, 0.0001);
+    //Ethane_energy.finite_central_differences_sd(Ethane_Coordinates, 0.0001);
 }

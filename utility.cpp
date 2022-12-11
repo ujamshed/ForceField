@@ -48,14 +48,14 @@ double calc_dihedral(arma::rowvec atom_i, arma::rowvec atom_j, arma::rowvec atom
     double value = arma::dot(n1, n2) / (dist_n1 * dist_n2);
 
     // Check to see if the value is less than -1 or greater than 1 (limits for acos function)
-    if (value < -1.00)
-    {
-        value = -1.00;
-    }
-    if (value > 1.00)
-    {
-        value = 1.00;
-    }
+    // if (value < -1.00)
+    // {
+    //     value = -1.00;
+    // }
+    // if (value > 1.00)
+    // {
+    //     value = 1.00;
+    // }
 
     double angle = acos(value);
 

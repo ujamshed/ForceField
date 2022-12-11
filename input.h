@@ -17,6 +17,8 @@ class Molecule
         arma::imat _bonding_data;
         // contains angles information for the molecule (i, j, k)
         arma::imat _angle_data;
+        // contains stretch bend information for the molecule (i, j, k)
+        arma::imat _stretch_bend_data;
         // contains dihedral angles information for the molecule (i, j, k, l)
         arma::imat _d_angle_data;
 

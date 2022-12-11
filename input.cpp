@@ -71,6 +71,25 @@ Molecule::Molecule(std::string filename)
             }
         }
 
+        // Parsing the stretch-bend information in the molecule;
+        while (std::getline(infile, line))
+        {
+            if (line.find("*") != std::string::npos)
+            {
+                break;
+            }
+
+            if (line.size() != 0){
+                std::stringstream lineStream(line); 
+                
+                arma::irowvec stretch_bend;
+                stretch_bend.zeros(3);
+
+                lineStream >> stretch_bend(0) >> stretch_bend(1) >> stretch_bend(2);
+                _stretch_bend_data = std::move(arma::join_cols(_stretch_bend_data, stretch_bend));
+            }
+        }
+
         // Parsing the dihedral/torsional angle information in the molecule;
         while (std::getline(infile, line))
         {
@@ -101,6 +120,7 @@ Molecule::Molecule(std::string filename)
         _atom_identity.print("Vector of mol identity");
         _bonding_data.print("Matrix of bonding information");
         _angle_data.print("Matrix of angle information");
+        _stretch_bend_data.print("Matrix of stretch bend information");
         _d_angle_data.print("Matrix of torsional angle information");
         _atom_types.print("Atom Types");
     }
