@@ -1,1 +1,5 @@
+// To create molecule
+obabel -ismi ethane.smi -osdf -O ethane.sdf --gen3d --ff
+
+// To get energy with contributions
 obenergy -ff MMFF94 -v methane.sdf

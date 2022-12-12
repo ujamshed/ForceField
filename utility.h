@@ -1,5 +1,6 @@
 #include <armadillo>
 #include <cmath>
+#include <fstream>
 
 // Helper function to calculate the difference between 2 vectors in 3D space.
 arma::rowvec vector_subtraction(arma::rowvec atom_i, arma::rowvec atom_j);
@@ -17,3 +18,6 @@ double calc_dihedral(arma::rowvec atom_i, arma::rowvec atom_j, arma::rowvec atom
 // Helper function to calculate the partial atomic charge between an atom and its bonded atoms.
 // Need to send in the information about an atom and ONLY its bonds.
 double calc_partial_atomic_charge(arma::mat atom_bonds);
+
+// Helper function to output the optimized coordinates into an sdf file to view in pymol or related molecule viewer.
+void sdf_output(int num_atoms, arma::irowvec atom_identity, arma::mat coordinates, arma::imat bonding);

@@ -40,11 +40,6 @@ double calc_dihedral(arma::rowvec atom_i, arma::rowvec atom_j, arma::rowvec atom
     double dist_n1 = euclidian_distance(n1, origin);
     double dist_n2 = euclidian_distance(n2, origin);
 
-    // n1.print("Normal vector 1");
-    // n2.print("Normal vector 2");
-    // std::cout << "Distance n1: " << dist_n1 << std::endl;
-    // std::cout << "Distance n2: " << dist_n2 << std::endl;
-
     double value = arma::dot(n1, n2) / (dist_n1 * dist_n2);
 
     // Check to see if the value is less than -1 or greater than 1 (limits for acos function)
@@ -69,3 +64,32 @@ double calc_partial_atomic_charge(arma::mat atom_types)
     return q0;
 };
 
+void sdf_output(int num_atoms, arma::irowvec atom_identity, arma::mat coordinates, arma::imat bonding)
+{
+    std::ofstream ofile("output.sdf");
+
+    std::map<int, char> int_to_ele_char = {{1, 'H'}, {6, 'C'}};
+
+    if (ofile.is_open())
+    {
+        // Add necessary spaces and number of atoms and number of bonds
+        ofile << "\n";
+        ofile << "\n";
+        ofile << "\n";
+        ofile << " " << num_atoms << " " << bonding.n_rows << "\n";
+        
+        // Get all the coordinate information
+        for (int i=0; i < num_atoms; i++)
+        {
+            ofile << " " << coordinates(i, 0) << " " << coordinates(i, 1) << " " << coordinates(i, 2) << " " << int_to_ele_char[atom_identity(i)] << std::endl;
+        }
+
+        // Get the bonding information
+        for (int j=0; j < bonding.n_rows; j++)
+        {
+            // Need to increment by 1 for the atoms since atoms are numbered starting at 1 in sdf file format.
+            ofile << "  " << bonding(j, 0)+1 << "  " << bonding(j, 1)+1 << "  " << bonding(j, 2) << std::endl;
+        }
+        ofile.close();
+    }
+}
