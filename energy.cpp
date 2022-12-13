@@ -105,7 +105,7 @@ class calcEnergy
             return 332.0716*qi*qj / (dielectric_constant * (delta_R + delta));
         }
 
-        double bondingContributions(arma::mat molecule_coordinates)
+        double bondingContributions(arma::mat molecule_coordinates, bool verbose=false)
         {
             // Loop through all the bonding data and evaluate the bonding energy summation
             double total = 0;
@@ -126,15 +126,16 @@ class calcEnergy
 
                 // Get distance between the 2 atoms
                 double dist = euclidian_distance(atom_i_coordinates, atom_j_coordinates);
-
-                // std::cout << "Atom i index: " << atom_i_index << " atom i type: " << atom_i_type << " Distance: " << dist << std::endl;
-                // std::cout << "Atom j index: " << atom_j_index << " atom j type: " << atom_j_type << std::endl;
             
                 // Get params
                 std::pair<int, int> atom_types = {atom_i_type, atom_j_type};
                 std::pair<double, double> params = bs_params[atom_types];
 
-                //std::cout << "Atom i: " << atom_types.first << " Atom j: " << atom_types.second << std::endl;
+                if (verbose)
+                {
+                    std::cout << "Atoms: " << atom_i_index << " " << atom_j_index << " " << " Distance: " << dist << std::endl;
+                }
+
                 double delta_R = dist - params.second;
                 total += bondStretching(params.first, delta_R);
             }
@@ -142,7 +143,7 @@ class calcEnergy
             return total;
         }
 
-        double angleContributions(arma::mat molecule_coordinates)
+        double angleContributions(arma::mat molecule_coordinates, bool verbose = false)
         {
             // Loop through all the angle data and evaluate the bonding energy summation
             double total = 0;
@@ -166,15 +167,16 @@ class calcEnergy
 
                 // Get angle between the 3 atoms
                 double angle = calc_angle(atom_i_coordinates, atom_j_coordinates, atom_k_coordinates);
-
-                // std::cout << "Atom i index: " << atom_i_index << " atom i type: " << atom_i_type << std::endl;
-                // std::cout << "Atom j index: " << atom_j_index << " atom j type: " << atom_j_type << std::endl;
             
                 // Get params
                 std::tuple<int, int, int> atom_types = {atom_i_type, atom_j_type, atom_k_type};
                 std::pair<double, double> params = ab_params[atom_types];
 
-                //std::cout << "Atom i: " << std::get<0>(atom_types) << " Atom j: " << std::get<1>(atom_types) << " Atom k: " << std::get<2>(atom_types) << std::endl;
+
+                if (verbose)
+                {
+                    std::cout << "Atoms: " << atom_i_index << " " << atom_j_index << " " << atom_k_index << " Angle: " << angle << std::endl;
+                }
 
                 double delta_Angle = angle - params.second;
                 total += angleBending(params.first, delta_Angle);
@@ -212,9 +214,6 @@ class calcEnergy
                 // Get angle between the 3 atoms
                 double angle = calc_angle(atom_i_coordinates, atom_j_coordinates, atom_k_coordinates);
 
-                // std::cout << "Atom i index: " << atom_i_index << " atom i type: " << atom_i_type << std::endl;
-                // std::cout << "Atom j index: " << atom_j_index << " atom j type: " << atom_j_type << std::endl;
-
                 // Get bond stretching params
                 std::pair<int, int> ij_atom_types = {atom_i_type, atom_j_type};
                 std::pair<double, double> bs_ij_params = bs_params[ij_atom_types];
@@ -229,15 +228,10 @@ class calcEnergy
                 // Get angle strech bend params
                 std::pair<double, double> asb = asb_params[ijk_atom_types];
 
-                //std::cout << "Atom i: " << std::get<0>(ijk_atom_types) << " Atom j: " << std::get<1>(ijk_atom_types) << " Atom k: " << std::get<2>(ijk_atom_types) << std::endl;
-
                 double delta_Angle = (angle - ab.second);
                 double delta_Rij = R_ij - bs_ij_params.second;
                 double delta_Rjk = R_jk - bs_jk_params.second;
 
-                // std::cout << "Valence Angle: " << angle << " Delta Angle: " << delta_Angle << " Delta Rij: " << delta_Rij << " Delta Rjk: " << delta_Rjk << std::endl;
-                // std::cout << "F constant ij: " << asb.first << " F constant jk: " << asb.second << std::endl;
-                // std::cout << std::endl;
                 total += angleStretchBending(asb.first, asb.second, delta_Rij, delta_Rjk, delta_Angle);
             }
 
@@ -353,9 +347,9 @@ class calcEnergy
         {
         };
 
-        double total(arma::mat molecule_coordinates)
+        double total(arma::mat molecule_coordinates, bool verbose=false)
         {
-            double total = bondingContributions(molecule_coordinates) + angleContributions(molecule_coordinates) + angleStretchBendingContributions(molecule_coordinates) + torsionalContributions(molecule_coordinates) + vdwContributions(molecule_coordinates);
+            double total = bondingContributions(molecule_coordinates, verbose) + angleContributions(molecule_coordinates, verbose) + angleStretchBendingContributions(molecule_coordinates) + torsionalContributions(molecule_coordinates) + vdwContributions(molecule_coordinates);
             std::cout << "Total is: " << total << std::endl;
             return total;
         }
@@ -523,14 +517,19 @@ class calcEnergy
 int main()
 {
     std::cout << "First Molecule: " << std::endl;
+    
+    //Molecule Ethane("data/methane.txt");
     Molecule Ethane("data/methane2.txt");
     arma::mat Ethane_Coordinates = Ethane.getMoleculeCoordinates();
     calcEnergy Ethane_energy(&Ethane);
-    Ethane_energy.total(Ethane_Coordinates);
+    std::cout << "Initial Methane Energy: " << std::endl;
+    Ethane_energy.total(Ethane_Coordinates, true);
     //Ethane_energy.finite_central_differences_sd(Ethane_Coordinates, 0.0001);
     arma::mat output = Ethane_energy.steepest_descent(0.001, 0.01);
+    
     //arma::mat output = Ethane_energy.steepest_descent_line_search(0.001, 0.01);
     output.print("Optimized coordinates");
-    Ethane_energy.total(output);
+    
+    Ethane_energy.total(output, true);
     Ethane_energy.export_sdf(output);
 }

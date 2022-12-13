@@ -1,6 +1,7 @@
 #include <armadillo>
 #include <cmath>
 #include <fstream>
+#include <iomanip>
 
 // Helper function to calculate the difference between 2 vectors in 3D space.
 arma::rowvec vector_subtraction(arma::rowvec atom_i, arma::rowvec atom_j);

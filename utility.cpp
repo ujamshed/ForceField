@@ -13,11 +13,11 @@ double euclidian_distance(arma::rowvec atom_i, arma::rowvec atom_j)
 
 double calc_angle(arma::rowvec atom_i, arma::rowvec atom_j, arma::rowvec atom_k)
 {
-    double d12 = euclidian_distance(atom_i, atom_j);
-    double d23 = euclidian_distance(atom_j, atom_k);
-    double d13 = euclidian_distance(atom_i, atom_k);
+    double dij = euclidian_distance(atom_i, atom_j);
+    double djk = euclidian_distance(atom_j, atom_k);
+    double dik = euclidian_distance(atom_i, atom_k);
 
-    double angle = acos((-pow(d13, 2) + pow(d12, 2) + pow(d23, 2)) / (2 * d12 * d23));
+    double angle = acos((-pow(dik, 2) + pow(dij, 2) + pow(djk, 2)) / (2 * dij * djk));
 
     return angle * (180/M_PI);
 };
@@ -77,11 +77,24 @@ void sdf_output(int num_atoms, arma::irowvec atom_identity, arma::mat coordinate
         ofile << "\n";
         ofile << "\n";
         ofile << " " << num_atoms << " " << bonding.n_rows << "\n";
-        
+                
         // Get all the coordinate information
         for (int i=0; i < num_atoms; i++)
         {
-            ofile << " " << coordinates(i, 0) << " " << coordinates(i, 1) << " " << coordinates(i, 2) << " " << int_to_ele_char[atom_identity(i)] << std::endl;
+            for (int j=0; j<3; j++)
+            {
+                if (coordinates(i,j) < 0)
+                {
+                    // 3 spaces if the number is negative
+                    ofile << std::fixed << std::setprecision(4) << "   " << coordinates(i, j);
+                }
+                else
+                {
+                    // 4 spaces otherwise
+                    ofile << std::fixed << std::setprecision(4) << "    " << coordinates(i, j);
+                }
+            }
+            ofile << " " << int_to_ele_char[atom_identity(i)] << std::endl;
         }
 
         // Get the bonding information
