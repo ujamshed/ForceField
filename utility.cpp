@@ -25,36 +25,23 @@ double calc_angle(arma::rowvec atom_i, arma::rowvec atom_j, arma::rowvec atom_k)
 double calc_dihedral(arma::rowvec atom_i, arma::rowvec atom_j, arma::rowvec atom_k, arma::rowvec atom_l)
 {
 
-    // Get vectors joining the 4 points together
-    arma::rowvec v1 = vector_subtraction(atom_i, atom_j);
-    arma::rowvec v2 = vector_subtraction(atom_j, atom_k);
-    arma::rowvec v3 = vector_subtraction(atom_k, atom_l);
+    // Calculating dihedral angle as per eq 12.8.5 in Crystal Structure Analysis for Chemists and Biologists
 
-    // Get normal vectors
-    arma::rowvec n1 = arma::cross(v1, v2);
-    arma::rowvec n2 = arma::cross(v2, v3);
+    // Get distances between all the coordinates
+    double d12 = euclidian_distance(atom_i, atom_j);
+    double d13 = euclidian_distance(atom_i, atom_k); 
+    double d14 = euclidian_distance(atom_i, atom_l); 
+    double d23 = euclidian_distance(atom_j, atom_k);
+    double d24 = euclidian_distance(atom_j, atom_l);
+    double d34 = euclidian_distance(atom_k, atom_l);
 
-    // Distance from origin to normal vectors to get their length
-    arma::rowvec origin = {0, 0, 0};
+    // Calculate P
+    double P = pow(d12, 2) * (pow(d23, 2) + pow(d34,2) - pow(d24, 2)) + pow(d23,2)*(-pow(d23,2) + pow(d34,2) + pow(d24,2)) + pow(d13, 2)*(pow(d23,2) - pow(d34,2) + pow(d24, 2)) - 2*pow(d23, 2)*pow(d14,2);
 
-    double dist_n1 = euclidian_distance(n1, origin);
-    double dist_n2 = euclidian_distance(n2, origin);
+    // Calculate Q
+    double Q = ((d12 + d23 + d13) * (d12 + d23 - d13) * (d12 - d23 + d13) * (-d12 + d23 + d13) * (d23 + d34 + d24) * (d23 + d34 -d24) * (d23 - d34 + d24) * (-d23 + d34 + d24));
 
-    double value = arma::dot(n1, n2) / (dist_n1 * dist_n2);
-
-    // Check to see if the value is less than -1 or greater than 1 (limits for acos function)
-    // if (value < -1.00)
-    // {
-    //     value = -1.00;
-    // }
-    // if (value > 1.00)
-    // {
-    //     value = 1.00;
-    // }
-
-    double angle = acos(value);
-
-    return angle * (180/M_PI);
+    return acos(P/sqrt(Q));
 };
 
 double calc_partial_atomic_charge(arma::mat atom_types)

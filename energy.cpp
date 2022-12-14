@@ -50,7 +50,6 @@ class calcEnergy
             return 143.9325 * (kb / 2) * delta_R * delta_R * (1 + cs*delta_R + 7/12*cs*cs*delta_R*delta_R);
         }
 
-        // Need helper function to calculate angle between the 3 atoms
         // delta_Angle is angle_ijk - reference angle.
         // Calculates the angle bending between atoms i, j and k, where j is the middle atom.
         double angleBending(double ka, double delta_Angle)
@@ -74,7 +73,6 @@ class calcEnergy
             return 0.043844 * (koop / 2) * X * X;
         }
 
-        // Need helper function to calculate the torsional angle (omega) between atoms i, j, k, l.
         // Calculates the torsional energy based on atoms i, j, k, l.
         double torsion(double V1, double V2, double V3, double omega)
         {
@@ -98,7 +96,7 @@ class calcEnergy
         // Calculates the electrostatic interaction between atoms i, j.
         double electrostatic(double delta_R, double qi, double qj)
         {
-            // dielectric constant of 1 is chosen to assume a vacuum. From introduction to computational chemistry page 41.
+            // dielectric constant of 1 is chosen to assume its within vacuum. From introduction to computational chemistry page 41.
             double dielectric_constant = 1.0;
             double delta = 0.05;
 
@@ -277,7 +275,8 @@ class calcEnergy
                 std::tuple<int, int, int, int> ijkl_atom_types = {atom_i_type, atom_j_type, atom_k_type, atom_l_type};
                 std::tuple<double, double, double> tp = t_params[ijkl_atom_types];
 
-                //std::cout << "Atom i: " << std::get<0>(ijkl_atom_types) << " Atom j: " << std::get<1>(ijkl_atom_types) << " Atom k: " << std::get<2>(ijkl_atom_types) << " Atom l: " << std::get<3>(ijkl_atom_types) << std::endl;
+                // Debugging
+                //std::cout << "Atoms: " << atom_i_index << " " << atom_j_index << " " << atom_k_index << " " << atom_l_index << " Angle: " << angle << std::endl;
 
                 total += torsion(std::get<0>(tp), std::get<1>(tp), std::get<2>(tp), angle);
             }
@@ -378,7 +377,7 @@ class calcEnergy
                     double plus_E = total(new_coordinates_plus);
                     double minus_E = total(new_coordinates_minus);
 
-                    double force = -(plus_E - minus_E) / (2*step_size);
+                    double force = (plus_E - minus_E) / (2*step_size);
                     zero(i, k) = force;
                 }
             }
@@ -387,6 +386,7 @@ class calcEnergy
         }
 
         // Steepest Descent
+        // Trivial, will not work for all starting arrangements
         arma::mat steepest_descent(double step_size, double tol)
         {
             arma::mat initial_guess = _Mol->_mol_data;
@@ -402,7 +402,7 @@ class calcEnergy
             
             while (arma::norm(derivative, 2) > tol)
             {
-                arma::mat new_positions = initial_guess + (derivative / arma::norm(derivative, 2)) * step_size;
+                arma::mat new_positions = initial_guess - (derivative / arma::norm(derivative, 2)) * step_size;
             
                 if (total(new_positions) < total(initial_guess))
                 {
@@ -430,82 +430,8 @@ class calcEnergy
         return initial_guess;
         }
 
-        // Steepest Descent with Line search
-        // Needs work
-        arma::mat steepest_descent_line_search(double step_size, double tol)
-        {
-            double gr = (sqrt(5) + 1) / 2;
-            arma::mat initial_guess = _Mol->_mol_data;
-
-            initial_guess.print("Initial Guess");
-
-            arma::mat derivative = finite_central_differences_sd(initial_guess, 0.0001);
-            double initial_energy = total(initial_guess);
-            std::cout << "Initial Energy: " << initial_energy << std::endl;
-
-            int count = 0;
-
-            while (arma::norm(derivative, 2) > tol)
-            {
-                // Reset step_size so it can be minimized towards tolerance again
-                step_size = 1.0;
-
-                // Get new position
-                arma::mat new_positions = initial_guess + (derivative / arma::norm(derivative, 2)) * step_size;
-
-                // Bracketing step
-                // Bracketing stops when lj potential of new_positions is higher than initial_positions
-                while (total(new_positions) < total(initial_guess))
-                {
-                    step_size *= 1.2;
-                    new_positions = initial_guess + (derivative / arma::norm(derivative, 2)) * step_size;
-                    std::cout << "Currently Bracketing..." << std::endl;
-                }
-
-                // Golden section
-                // A = initial guess
-                // B = new position
-                arma::mat C = new_positions - (new_positions - initial_guess) / gr; 
-                arma::mat D = initial_guess + (new_positions - initial_guess) / gr;
-                
-                // line search to optimize step_size
-                while (step_size > tol)
-                {
-                    if (total(C) < total(D))
-                    {
-                        new_positions = D;
-                    }
-                    
-                    else
-                    {
-                        initial_guess = C;
-                    }
-
-                    C = new_positions - (new_positions - initial_guess) / gr; 
-                    D = initial_guess + (new_positions - initial_guess) / gr;
-
-                    // solve for step_size, not necessary
-                    arma::mat difference = (new_positions - initial_guess);
-                    arma::mat unit_vector = (derivative / arma::norm(derivative, 2));
-
-                    step_size = difference(0, 2) / unit_vector(0, 2);
-                }
-                
-                // Update initial guess to the new optimal
-                initial_guess = (new_positions + initial_guess) / 2;
-
-                derivative = finite_central_differences_sd(initial_guess, 0.0001);
-                std::cout << std::endl;
-                std::cout << "Step: " << count << std::endl;
-                std::cout << "Energy: " << total(initial_guess) << std::endl;
-                std::cout << "Force Norm: " << arma::norm(derivative, 2) << std::endl;
-                initial_guess.print("New positions");
-                std::cout << std::endl;
-
-                count += 1;
-            }
-            return initial_guess;
-        }
+        // TODO
+        // BFGS
 
         // Function to export the molecule information in sdf format
         void export_sdf(arma::mat coordinates)
@@ -519,17 +445,16 @@ int main()
     std::cout << "First Molecule: " << std::endl;
     
     //Molecule Ethane("data/methane.txt");
-    Molecule Ethane("data/methane2.txt");
+    //Molecule Ethane("data/methane2.txt");
+    Molecule Ethane("data/ethane.txt");
     arma::mat Ethane_Coordinates = Ethane.getMoleculeCoordinates();
     calcEnergy Ethane_energy(&Ethane);
     std::cout << "Initial Methane Energy: " << std::endl;
-    Ethane_energy.total(Ethane_Coordinates, true);
+    Ethane_energy.total(Ethane_Coordinates, false);
     //Ethane_energy.finite_central_differences_sd(Ethane_Coordinates, 0.0001);
+    
     arma::mat output = Ethane_energy.steepest_descent(0.001, 0.01);
-    
-    //arma::mat output = Ethane_energy.steepest_descent_line_search(0.001, 0.01);
     output.print("Optimized coordinates");
-    
     Ethane_energy.total(output, true);
-    Ethane_energy.export_sdf(output);
+    //Ethane_energy.export_sdf(output);
 }
