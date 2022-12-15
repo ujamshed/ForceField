@@ -349,12 +349,12 @@ class calcEnergy
         double total(arma::mat molecule_coordinates, bool verbose=false)
         {
             double total = bondingContributions(molecule_coordinates, verbose) + angleContributions(molecule_coordinates, verbose) + angleStretchBendingContributions(molecule_coordinates) + torsionalContributions(molecule_coordinates) + vdwContributions(molecule_coordinates);
-            std::cout << "Total is: " << total << std::endl;
+            //std::cout << "Total is: " << total << std::endl;
             return total;
         }
 
         // Function to calculate central difference using input matrix
-        arma::mat finite_central_differences_sd(arma::mat Coordinates, double step_size)
+        arma::mat grad(arma::mat Coordinates, double step_size=0.0001)
         {
             arma::mat zero;
             zero.zeros(_Mol->_num_atoms,3);
@@ -381,7 +381,6 @@ class calcEnergy
                     zero(i, k) = force;
                 }
             }
-            zero.print("Current Gradient");
             return zero;
         }
 
@@ -393,7 +392,7 @@ class calcEnergy
 
             initial_guess.print("Initial Guess");
 
-            arma::mat derivative = finite_central_differences_sd(initial_guess, step_size);
+            arma::mat derivative = grad(initial_guess, step_size);
             double initial_energy = total(initial_guess);
             std::cout << "Initial Energy: " << initial_energy << std::endl;
 
@@ -408,7 +407,7 @@ class calcEnergy
                 {
                     initial_guess = new_positions;
                     step_size *= 1.2;
-                    derivative = finite_central_differences_sd(initial_guess, step_size);
+                    derivative = grad(initial_guess, step_size);
 
                     std::cout << std::endl;
                     std::cout << "Step: " << count << std::endl;
@@ -430,8 +429,72 @@ class calcEnergy
         return initial_guess;
         }
 
+        // Backtrack line-search with wolfe conditions
+        double line_search(arma::mat coordinates, arma::mat search_direction, arma::mat gradient)
+        {
+            // Coordinates and Gradient are in the size of (NUM_ATOMS X 3)
+            double a = 1;
+            double c1 = 1e-4;
+            double c2 = 0.9;
+            double initial_energy = total(coordinates);
+
+            arma::mat new_coordinates = coordinates + a * search_direction;
+            arma::mat new_grad = grad(new_coordinates);
+
+            // Use the frobenius inner product between gradient and search direction
+            while ( (total(new_coordinates) >= (initial_energy + (c1*a*arma::dot(gradient,search_direction) )) || (arma::dot(new_grad, search_direction) <= (c2*arma::dot(gradient, search_direction)) )) )
+            {
+                a *= 0.5;
+                new_coordinates = coordinates + a * search_direction; 
+                new_grad = grad(new_coordinates);
+            }
+
+            return a;
+        }
+
         // TODO
         // BFGS
+        void BFGS(double tol)
+        {
+            // Initial Guess
+            arma::mat initial_guess = _Mol->_mol_data;
+            
+            // Initial Gradient
+            std::cout << "Inside BFGS" << std::endl;
+            arma::mat initial_gradient = grad(initial_guess);
+            initial_gradient.print("Initial Gradient");
+
+            // Initial Hessian
+            // Should be 3N x 3N because the optimization degrees of freedom is 3N.
+            arma::mat H = arma::eye(3*_Mol->_num_atoms, 3*_Mol->_num_atoms);
+
+            // Starting here needs to go inside the while loop
+            // Convert initial gradient to a column vector to multiply with the initial identity hessian to yield a (15x1) search direction vector.
+            arma::vec colvec_gradient = initial_gradient.as_col();
+            arma::vec search_direction = -H*colvec_gradient;
+
+            // Reshaping the (15x1) search direction into 5x3 to use in our line search gives us the correct orientation for each atom and coordinate.
+            arma::mat search_direction_mat = arma::reshape(search_direction, 5, 3);
+            search_direction_mat.print("Matrix of Search Direction");
+            
+            double a = line_search(initial_guess, search_direction_mat, initial_gradient);
+            std::cout << a << std::endl;
+            
+            arma::vec s = search_direction*a;
+            arma::mat new_coordinates = initial_guess + a*search_direction_mat;
+            new_coordinates.print("New Coordinates");
+
+            arma::mat new_gradient = grad(new_coordinates);
+            new_gradient.print("New Gradient");
+
+            arma::mat y = new_gradient - initial_gradient;
+            y.print("Gradient Delta");
+
+            // while (arma::norm(initial_gradient, 2) > tol)
+            // {
+                
+            // }
+        }
 
         // Function to export the molecule information in sdf format
         void export_sdf(arma::mat coordinates)
@@ -445,16 +508,17 @@ int main()
     std::cout << "First Molecule: " << std::endl;
     
     //Molecule Ethane("data/methane.txt");
-    //Molecule Ethane("data/methane2.txt");
-    Molecule Ethane("data/ethane.txt");
+    Molecule Ethane("data/methane2.txt");
+    //Molecule Ethane("data/ethane.txt");
     arma::mat Ethane_Coordinates = Ethane.getMoleculeCoordinates();
     calcEnergy Ethane_energy(&Ethane);
     std::cout << "Initial Methane Energy: " << std::endl;
     Ethane_energy.total(Ethane_Coordinates, false);
     //Ethane_energy.finite_central_differences_sd(Ethane_Coordinates, 0.0001);
     
-    arma::mat output = Ethane_energy.steepest_descent(0.001, 0.01);
-    output.print("Optimized coordinates");
-    Ethane_energy.total(output, true);
+    //arma::mat output = Ethane_energy.steepest_descent(0.001, 0.01);
+    //output.print("Optimized coordinates");
+    //Ethane_energy.total(output, true);
+    Ethane_energy.BFGS(0.0001);
     //Ethane_energy.export_sdf(output);
 }
