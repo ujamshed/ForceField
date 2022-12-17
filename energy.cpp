@@ -237,7 +237,7 @@ class calcEnergy
             return total;
         }
         
-        // Ethane does not have oop contributions, so this is not implemented for now.
+        // Saturated aliphatics do not have oop contributions, so this is not implemented for now.
         void oopContributions()
         {
 
@@ -341,7 +341,7 @@ class calcEnergy
             return total;
         };
 
-        // Ethane does not have electrostatic contributions, so this is not implemented for now.
+        // Saturated aliphatics do not have electrostatic contributions, so this is not implemented for now.
         void electrostaticContributions()
         {
         };
@@ -452,12 +452,12 @@ class calcEnergy
             return a;
         }
 
-        // TODO
         // BFGS
         arma::mat BFGS(double tol)
         {
             // Initial Guess
             arma::mat initial_guess = _Mol->_mol_data;
+            int num_atoms = _Mol->_num_atoms;
             
             // Initial Gradient
             std::cout << "Inside BFGS" << std::endl;
@@ -466,7 +466,7 @@ class calcEnergy
 
             // Initial Hessian
             // Should be 3N x 3N because the optimization degrees of freedom is 3N.
-            arma::mat H = arma::eye(3*_Mol->_num_atoms, 3*_Mol->_num_atoms);
+            arma::mat H = arma::eye(3*num_atoms, 3*num_atoms);
             H.print("Initial Hessian");
 
             int step = 0;
@@ -481,31 +481,24 @@ class calcEnergy
                 arma::vec search_direction = -H*colvec_gradient;
 
                 // Reshaping the (15x1) search direction into 5x3 to use in our line search gives us the correct orientation for each atom and coordinate.
-                arma::mat search_direction_mat = arma::reshape(search_direction, 3, _Mol->_num_atoms).t();
-                //search_direction_mat.print("Matrix of Search Direction");
+                arma::mat search_direction_mat = arma::reshape(search_direction, 3, num_atoms).t();
                 
                 double a = line_search(initial_guess, search_direction_mat, initial_gradient);
-                //std::cout << "Step size value from line search: " << a << std::endl;
                 
-                //search_direction.print("Search Direction Vector");
                 arma::vec s = search_direction*a;
                 arma::mat new_coordinates = initial_guess + a*search_direction_mat;
-                //new_coordinates.print("New Coordinates");
                 
                 // Checking energy
                 std::cout << "Energy: " << total(new_coordinates) << std::endl;
 
                 arma::mat new_gradient = grad(new_coordinates);
-                //new_gradient.print("New Gradient");
 
                 arma::mat y = new_gradient - initial_gradient;
-                //y.print("Gradient difference (Y matrix)");
                 arma::vec y_vector = y.as_row().t();
-                //y_vector.print("Y column vector");
 
                 double r = 1/arma::dot(y_vector, s);
-                arma::mat li = (arma::eye(3*_Mol->_num_atoms, 3*_Mol->_num_atoms) - (r*((s*y_vector.t()))));
-                arma::mat ri = (arma::eye(3*_Mol->_num_atoms, 3*_Mol->_num_atoms) - (r*((y_vector*s.t()))));
+                arma::mat li = (arma::eye(3*num_atoms, 3*num_atoms) - (r*((s*y_vector.t()))));
+                arma::mat ri = (arma::eye(3*num_atoms, 3*num_atoms) - (r*((y_vector*s.t()))));
 
                 arma::mat hess_inter = li*H*ri;
 
@@ -521,9 +514,9 @@ class calcEnergy
         }
 
         // Function to export the molecule information in sdf format
-        void export_sdf(arma::mat coordinates)
+        void export_sdf(arma::mat coordinates, std::string name)
         {
-            sdf_output(_Mol->_num_atoms, _Mol->_atom_identity, coordinates, _Mol->_bonding_data);
+            sdf_output(_Mol->_num_atoms, _Mol->_atom_identity, coordinates, _Mol->_bonding_data, name);
         }
 };
 
@@ -534,17 +527,20 @@ int main()
     //Molecule Ethane("data/methane.txt");
     //Molecule Ethane("data/ethane2.txt");
     Molecule Ethane("data/ethane2.txt");
-    arma::mat Ethane_Coordinates = Ethane.getMoleculeCoordinates();
+    
+    // Get input ethane coordinates
+    arma::mat Initial_Ethane_Coordinates = Ethane.getMoleculeCoordinates();
+
+    // Calculate initial ethane energy
     calcEnergy Ethane_energy(&Ethane);
     std::cout << "Initial Ethane Energy: " << std::endl;
-    std::cout << Ethane_energy.total(Ethane_Coordinates, false) << std::endl;
-    //arma::mat gradient = Ethane_energy.grad(Ethane_Coordinates);
-    //gradient.print("Gradient");
-    //Ethane_energy.finite_central_differences_sd(Ethane_Coordinates, 0.0001);
-    
-    //arma::mat output = Ethane_energy.steepest_descent(0.001, 0.01);
-    //output.print("Optimized coordinates");
-    //Ethane_energy.total(output, true);
+    std::cout << Ethane_energy.total(Initial_Ethane_Coordinates, false) << std::endl;
+
+    // Export initial ethane coordinates (to compare with output)
+    Ethane_energy.export_sdf(Initial_Ethane_Coordinates, "ethane_input");
+
+    // Optimize structure and output final energy and export the final output
     arma::mat output = Ethane_energy.BFGS(0.0001);
-    Ethane_energy.export_sdf(output);
+    Ethane_energy.total(output);
+    Ethane_energy.export_sdf(output, "ethane_out");
 }

@@ -60,16 +60,17 @@ double calc_partial_atomic_charge(arma::mat atom_types)
     return q0;
 };
 
-void sdf_output(int num_atoms, arma::irowvec atom_identity, arma::mat coordinates, arma::imat bonding)
+void sdf_output(int num_atoms, arma::irowvec atom_identity, arma::mat coordinates, arma::imat bonding, std::string name)
 {
-    std::ofstream ofile("output.sdf");
+    std::string filename = "output/" + name + ".sdf";
+    std::ofstream ofile(filename);
 
     std::map<int, char> int_to_ele_char = {{1, 'H'}, {6, 'C'}};
 
     if (ofile.is_open())
     {
         // Add necessary spaces and number of atoms and number of bonds
-        ofile << "\n";
+        ofile << "MMFF94 Implementation as CHEM279 final project\n";
         ofile << "\n";
         ofile << "\n";
         ofile << " " << num_atoms << " " << bonding.n_rows << "\n";

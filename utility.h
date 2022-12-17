@@ -21,4 +21,4 @@ double calc_dihedral(arma::rowvec atom_i, arma::rowvec atom_j, arma::rowvec atom
 double calc_partial_atomic_charge(arma::mat atom_bonds);
 
 // Helper function to output the optimized coordinates into an sdf file to view in pymol or related molecule viewer.
-void sdf_output(int num_atoms, arma::irowvec atom_identity, arma::mat coordinates, arma::imat bonding);
+void sdf_output(int num_atoms, arma::irowvec atom_identity, arma::mat coordinates, arma::imat bonding, std::string name);
