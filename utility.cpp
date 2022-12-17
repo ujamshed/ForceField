@@ -41,7 +41,16 @@ double calc_dihedral(arma::rowvec atom_i, arma::rowvec atom_j, arma::rowvec atom
     // Calculate Q
     double Q = ((d12 + d23 + d13) * (d12 + d23 - d13) * (d12 - d23 + d13) * (-d12 + d23 + d13) * (d23 + d34 + d24) * (d23 + d34 -d24) * (d23 - d34 + d24) * (-d23 + d34 + d24));
 
-    return acos(P/sqrt(Q));
+    double value = P/sqrt(Q);
+    if ((P/sqrt(Q)) < -1)
+    {
+        value = -1;
+    }
+    if ((P/sqrt(Q)) > 1)
+    {
+        value = 1;
+    }
+    return acos(value);
 };
 
 double calc_partial_atomic_charge(arma::mat atom_types)
