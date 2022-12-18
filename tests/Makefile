@@ -23,11 +23,19 @@ LIB_DIR     = ../lib
 BIN_DIR     = ../bin
 
 # The next line contains the list of utility objects created by this Makefile.
-EXECUTABLES = t1
+EXECUTABLES = t1 t2 t3
 
 t1: $(INC_DIR)/utility.h $(INC_DIR)/input.h $(INC_DIR)/energy.h
 	$(CXX) $(CXXFLAGS) t1 t1.cpp -I$(INC_DIR) $(LIB_DIR)/utility.o $(LIB_DIR)/input.o $(LIB_DIR)/energy.o -larmadillo
 	mv t1 $(BIN_DIR)
+
+t2: $(INC_DIR)/utility.h $(INC_DIR)/input.h $(INC_DIR)/energy.h
+	$(CXX) $(CXXFLAGS) t2 t2.cpp -I$(INC_DIR) $(LIB_DIR)/utility.o $(LIB_DIR)/input.o $(LIB_DIR)/energy.o -larmadillo
+	mv t2 $(BIN_DIR)
+
+t3: $(INC_DIR)/utility.h $(INC_DIR)/input.h $(INC_DIR)/energy.h
+	$(CXX) $(CXXFLAGS) t3 t3.cpp -I$(INC_DIR) $(LIB_DIR)/utility.o $(LIB_DIR)/input.o $(LIB_DIR)/energy.o -larmadillo
+	mv t3 $(BIN_DIR)
 
 all: $(EXECUTABLES)
 
