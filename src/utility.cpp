@@ -62,7 +62,7 @@ double calc_partial_atomic_charge(arma::mat atom_types)
 
 void sdf_output(int num_atoms, arma::irowvec atom_identity, arma::mat coordinates, arma::imat bonding, std::string name)
 {
-    std::string filename = "output/" + name + ".sdf";
+    std::string filename = "../output/" + name + ".sdf";
     std::ofstream ofile(filename);
 
     std::map<int, char> int_to_ele_char = {{1, 'H'}, {6, 'C'}};

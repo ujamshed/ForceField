@@ -25,11 +25,13 @@
 *.la
 *.a
 *.lib
+lib/
 
 # Executables
 *.exe
 *.out
 *.app
+bin/
 
 # Build
 build/*
