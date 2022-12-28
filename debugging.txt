@@ -1,3 +1,5 @@
+Requires the use of openbabel
+
 // To create molecule
 obabel -ismi butane.smi -osdf -O butane.sdf --gen3d --ff
 

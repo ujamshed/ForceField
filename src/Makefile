@@ -3,7 +3,7 @@
 # University of California, Berkeley
 # 
 # Creator:  U Jamshed, Student
-# Date Created: Sept 22nd, 2022
+# Date Created: Dec 15nd, 2022
 #
 # This makefile creates objects from the src directory of functions and procedures in C++
 # after creation the objects are relocated to the ../lib directory

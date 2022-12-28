@@ -1,9 +1,9 @@
 #
-# MSSE Chem 274B - Fall Semester
+# MSSE Chem 279 - Fall Semester
 # University of California, Berkeley
 # 
 # Creator:  U Jamshed, Student
-# Date Created: Sept 22nd, 2022
+# Date Created: Dec 15nd, 2022
 #
 # This makefile creates object files containing tests that are executable (i.e. they have main() functions)
 # They test the functionalities in ROOT_DIRECTORY. After creating the executable files they
@@ -23,7 +23,7 @@ LIB_DIR     = ../lib
 BIN_DIR     = ../bin
 
 # The next line contains the list of utility objects created by this Makefile.
-EXECUTABLES = t1 t2 t3
+EXECUTABLES = t1 t2 t3 ff
 
 t1: $(INC_DIR)/utility.h $(INC_DIR)/input.h $(INC_DIR)/energy.h
 	$(CXX) $(CXXFLAGS) t1 t1.cpp -I$(INC_DIR) $(LIB_DIR)/utility.o $(LIB_DIR)/input.o $(LIB_DIR)/energy.o -larmadillo
@@ -36,6 +36,10 @@ t2: $(INC_DIR)/utility.h $(INC_DIR)/input.h $(INC_DIR)/energy.h
 t3: $(INC_DIR)/utility.h $(INC_DIR)/input.h $(INC_DIR)/energy.h
 	$(CXX) $(CXXFLAGS) t3 t3.cpp -I$(INC_DIR) $(LIB_DIR)/utility.o $(LIB_DIR)/input.o $(LIB_DIR)/energy.o -larmadillo
 	mv t3 $(BIN_DIR)
+
+ff: $(INC_DIR)/utility.h $(INC_DIR)/input.h $(INC_DIR)/energy.h
+	$(CXX) $(CXXFLAGS) ff ff.cpp -I$(INC_DIR) $(LIB_DIR)/utility.o $(LIB_DIR)/input.o $(LIB_DIR)/energy.o -larmadillo
+	mv ff $(BIN_DIR)
 
 all: $(EXECUTABLES)
 

@@ -4,10 +4,8 @@
 
 int main()
 {
-    std::cout << "First Molecule: " << std::endl;
+    std::cout << "Molecule: " << std::endl;
     
-    //Molecule Ethane("data/methane.txt");
-    //Molecule Ethane("data/ethane2.txt");
     Molecule Ethane("../data/ethane2.txt");
     
     // Get input ethane coordinates

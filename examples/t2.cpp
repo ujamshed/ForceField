@@ -4,7 +4,7 @@
 
 int main()
 {
-    std::cout << "First Molecule: " << std::endl;
+    std::cout << "Molecule: " << std::endl;
     
     Molecule methane("../data/methane2.txt");
     
