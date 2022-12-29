@@ -22,7 +22,7 @@ INC_DIR = ../include
 LIB_DIR     = ../lib
 BIN_DIR     = ../bin
 
-# The next line contains the list of utility objects created by this Makefile.
+# The next line contains the list of example created by this Makefile.
 EXECUTABLES = t1 t2 t3 ff
 
 t1: $(INC_DIR)/utility.h $(INC_DIR)/input.h $(INC_DIR)/energy.h

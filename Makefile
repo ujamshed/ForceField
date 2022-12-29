@@ -12,12 +12,15 @@
 # This is the root or home directory
 
 SRC_DIR = src/
+TEST_DIR = tests/
 EX_DIR = examples/
 
 all:
 	cd $(SRC_DIR); make all
+	cd $(TEST_DIR); make all
 	cd $(EX_DIR); make all
 
 cleanall:
 	cd $(SRC_DIR); make cleanall
+	cd $(TEST_DIR); make cleanall
 	cd $(EX_DIR); make cleanall
