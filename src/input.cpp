@@ -26,9 +26,6 @@ Molecule::Molecule(std::string filename)
         {
                 infile >> _mol_data(current_atom, 0) >> _mol_data(current_atom, 1) >> _mol_data(current_atom, 2) >> atom_iden;
                 
-                // Adding atom identity
-                //_mol_data(current_atom, 0) = current_atom;
-
                 _atom_identity(current_atom) = symbol_to_int[atom_iden];
                 current_atom += 1;
         }
@@ -109,7 +106,7 @@ Molecule::Molecule(std::string filename)
             }
         }
 
-        // Assigning atom types (trivial implementation assuming only alkanes)
+        // Assigning atom types (trivial implementation assuming only saturated alkanes)
         _atom_types.zeros(_num_atoms);
         for (int i = 0; i < _num_atoms; i++)
         {
