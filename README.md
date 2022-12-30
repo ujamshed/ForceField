@@ -31,7 +31,7 @@ Use the CL executable ff, found in the bin folder after compilation.
 
 ## Creating your own executable
 
-```
+```c++
 #include "../include/input.h"
 #include "../include/utility.h"
 #include "../include/energy.h"
@@ -61,6 +61,7 @@ int main()
     
     Mol_energy.total(output);
     Mol_energy.export_sdf(output, "mol_out");
+}
 ```
 
 ## Dependencies
