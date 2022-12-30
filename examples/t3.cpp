@@ -24,7 +24,6 @@ int main()
     Methane_energy.export_sdf(Initial_Methane_Coordinates, "methane3_input");
 
     // Optimize structure and output final energy and export the final output
-    //arma::mat output = Methane_energy.BFGS(0.0001);
     arma::mat output = BFGS(Initial_Methane_Coordinates, 0.0001, methane_atoms, Methane_energy);
     
     Methane_energy.total(output);
