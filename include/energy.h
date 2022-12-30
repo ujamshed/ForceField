@@ -1,6 +1,7 @@
 #pragma once
 #include "input.h"
 #include "utility.h"
+#include "output.h"
 
 class calcEnergy
 {
@@ -81,19 +82,6 @@ class calcEnergy
         void electrostaticContributions();
 
         double total(arma::mat molecule_coordinates, bool verbose=false);
-
-        // Function to calculate central difference using input matrix
-        arma::mat grad(arma::mat Coordinates, double step_size=0.0001);
-
-        // Steepest Descent
-        // Trivial, will not work for all starting arrangements
-        arma::mat steepest_descent(double step_size, double tol);
-
-        // Backtrack line-search with wolfe conditions
-        double line_search(arma::mat coordinates, arma::mat search_direction, arma::mat gradient);
-
-        // BFGS
-        arma::mat BFGS(double tol);
 
         // Function to export the molecule information in sdf format
         void export_sdf(arma::mat coordinates, std::string name);

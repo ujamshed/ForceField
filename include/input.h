@@ -32,4 +32,5 @@ class Molecule
         Molecule(std::string filename);
 
         arma::mat getMoleculeCoordinates();
+        int getNumberOfAtoms();
 };

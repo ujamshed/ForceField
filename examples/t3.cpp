@@ -1,6 +1,7 @@
 #include "../include/input.h"
 #include "../include/utility.h"
 #include "../include/energy.h"
+#include "../include/optimizers.h"
 
 int main()
 {
@@ -11,6 +12,9 @@ int main()
     // Get input methane coordinates
     arma::mat Initial_Methane_Coordinates = methane.getMoleculeCoordinates();
 
+    // Get methane atoms
+    int methane_atoms = methane.getNumberOfAtoms();
+
     // Calculate initial methane energy
     calcEnergy Methane_energy(&methane);
     std::cout << "Initial Methane Energy: " << std::endl;
@@ -20,7 +24,9 @@ int main()
     Methane_energy.export_sdf(Initial_Methane_Coordinates, "methane3_input");
 
     // Optimize structure and output final energy and export the final output
-    arma::mat output = Methane_energy.BFGS(0.0001);
+    //arma::mat output = Methane_energy.BFGS(0.0001);
+    arma::mat output = BFGS(Initial_Methane_Coordinates, 0.0001, methane_atoms, Methane_energy);
+    
     Methane_energy.total(output);
     Methane_energy.export_sdf(output, "Methane3_out");
 }

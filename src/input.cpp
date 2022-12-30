@@ -130,3 +130,8 @@ arma::mat Molecule::getMoleculeCoordinates()
 {
     return _mol_data;
 }
+
+int Molecule::getNumberOfAtoms()
+{
+    return _num_atoms;
+}

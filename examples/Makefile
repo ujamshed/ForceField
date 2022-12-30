@@ -26,19 +26,19 @@ BIN_DIR     = ../bin
 EXECUTABLES = t1 t2 t3 ff
 
 t1: $(INC_DIR)/utility.h $(INC_DIR)/input.h $(INC_DIR)/energy.h
-	$(CXX) $(CXXFLAGS) t1 t1.cpp -I$(INC_DIR) $(LIB_DIR)/utility.o $(LIB_DIR)/input.o $(LIB_DIR)/energy.o -larmadillo
+	$(CXX) $(CXXFLAGS) t1 t1.cpp -I$(INC_DIR) $(LIB_DIR)/utility.o $(LIB_DIR)/input.o $(LIB_DIR)/energy.o $(LIB_DIR)/optimizers.o $(LIB_DIR)/output.o -larmadillo
 	mv t1 $(BIN_DIR)
 
 t2: $(INC_DIR)/utility.h $(INC_DIR)/input.h $(INC_DIR)/energy.h
-	$(CXX) $(CXXFLAGS) t2 t2.cpp -I$(INC_DIR) $(LIB_DIR)/utility.o $(LIB_DIR)/input.o $(LIB_DIR)/energy.o -larmadillo
+	$(CXX) $(CXXFLAGS) t2 t2.cpp -I$(INC_DIR) $(LIB_DIR)/utility.o $(LIB_DIR)/input.o $(LIB_DIR)/energy.o $(LIB_DIR)/optimizers.o $(LIB_DIR)/output.o -larmadillo
 	mv t2 $(BIN_DIR)
 
 t3: $(INC_DIR)/utility.h $(INC_DIR)/input.h $(INC_DIR)/energy.h
-	$(CXX) $(CXXFLAGS) t3 t3.cpp -I$(INC_DIR) $(LIB_DIR)/utility.o $(LIB_DIR)/input.o $(LIB_DIR)/energy.o -larmadillo
+	$(CXX) $(CXXFLAGS) t3 t3.cpp -I$(INC_DIR) $(LIB_DIR)/utility.o $(LIB_DIR)/input.o $(LIB_DIR)/energy.o $(LIB_DIR)/optimizers.o $(LIB_DIR)/output.o -larmadillo
 	mv t3 $(BIN_DIR)
 
 ff: $(INC_DIR)/utility.h $(INC_DIR)/input.h $(INC_DIR)/energy.h
-	$(CXX) $(CXXFLAGS) ff ff.cpp -I$(INC_DIR) $(LIB_DIR)/utility.o $(LIB_DIR)/input.o $(LIB_DIR)/energy.o -larmadillo
+	$(CXX) $(CXXFLAGS) ff ff.cpp -I$(INC_DIR) $(LIB_DIR)/utility.o $(LIB_DIR)/input.o $(LIB_DIR)/energy.o $(LIB_DIR)/optimizers.o $(LIB_DIR)/output.o -larmadillo
 	mv ff $(BIN_DIR)
 
 all: $(EXECUTABLES)

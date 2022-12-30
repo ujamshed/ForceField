@@ -26,7 +26,7 @@ BIN_DIR     = ../bin
 EXECUTABLES = unit_tests
 
 unit_tests: $(INC_DIR)/utility.h $(INC_DIR)/input.h $(INC_DIR)/energy.h
-	$(CXX) $(CXXFLAGS) unit_tests unit_tests.cpp -I$(INC_DIR) $(LIB_DIR)/utility.o $(LIB_DIR)/input.o $(LIB_DIR)/energy.o -larmadillo
+	$(CXX) $(CXXFLAGS) unit_tests unit_tests.cpp -I$(INC_DIR) $(LIB_DIR)/utility.o $(LIB_DIR)/input.o $(LIB_DIR)/energy.o $(LIB_DIR)/optimizers.o $(LIB_DIR)/output.o -larmadillo
 
 all: $(EXECUTABLES)
 

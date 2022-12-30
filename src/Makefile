@@ -22,7 +22,11 @@ LIB_DIR     = ../lib
 
 # The next line contains the list of math object files created by this Makefile.
 # they are the targets this makefile builds
-DATA_STRUCT_OBJS = utility.o input.o energy.o 
+DATA_STRUCT_OBJS = output.o utility.o input.o energy.o optimizers.o
+
+output.o: $(INC_DIR)/output.h
+	$(CXX) $(CXXFLAGS) output.cpp -I$(INC_DIR)
+	mv output.o $(LIB_DIR)
 
 utility.o: $(INC_DIR)/utility.h
 	$(CXX) $(CXXFLAGS) utility.cpp -I$(INC_DIR)
@@ -35,6 +39,10 @@ input.o: $(INC_DIR)/input.h
 energy.o: $(INC_DIR)/energy.h
 	$(CXX) $(CXXFLAGS) energy.cpp -I$(INC_DIR)
 	mv energy.o $(LIB_DIR)
+
+optimizers.o: $(INC_DIR)/optimizers.h
+	$(CXX) $(CXXFLAGS) optimizers.cpp -I$(INC_DIR)
+	mv optimizers.o $(LIB_DIR)
 
 all: $(DATA_STRUCT_OBJS)
 
